@@ -19,9 +19,9 @@ apply plugin: 'forge'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-version = "2.0.3"
+version = "1.7.10-2.0.3"
 group= "gravisuite"
-archivesBaseName = "GraviSuite-1.7.10"
+archivesBaseName = "GraviSuite"
 
 minecraft {
 	version = "1.7.10-10.13.2.1291"
@@ -29,7 +29,7 @@ minecraft {
 }
 
 dependencies {
-	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapperPlugin.jar', 'lib/GraviSuite-1.7.10-2.0.3-deobf.jar', 'lib/industrialcraft-2-2.2.710-experimental-dev.jar')
+	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapper.jar', 'lib/GraviSuite-1.7.10-2.0.3-dev.jar', 'lib/industrialcraft-2-2.2.736-experimental-dev.jar')
 }
 
 jar {
