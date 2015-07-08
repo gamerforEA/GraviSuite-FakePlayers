@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.gamerforea.gravisuite.EventConfig;
 import com.gamerforea.gravisuite.FakePlayerUtils;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -175,7 +176,7 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 									if (localBlock != null && this.canHarvestBlock(localBlock, stack))
 									{
 										// TODO gamerforEA code start
-										if (FakePlayerUtils.cantBreak(player, xPos, yPos, zPos)) continue;
+										if (EventConfig.advDDrillEvent && FakePlayerUtils.cantBreak(player, xPos, yPos, zPos)) continue;
 										// TODO gamerforEA code end
 										if (localBlock.getBlockHardness(world, xPos, yPos, zPos) >= 0F)
 										{
@@ -261,6 +262,9 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 	{
 		NBTTagCompound nbt = GraviSuite.getOrCreateNbtData(itemstack);
 		int toolMode = nbt.getInteger("toolMode");
+		// TODO gamerforEA code start
+		if (EventConfig.disableAdvDDrillBigHoleMode && toolMode == 3) toolMode = 0;
+		// TODO gamerforEA code end
 		if (toolMode < 0 || toolMode > 3) toolMode = 0;
 
 		return toolMode;
@@ -309,6 +313,9 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 		if (Keyboard.isModeKeyDown(player))
 		{
 			int toolMode = readToolMode(itemStack) + 1;
+			// TODO gamerforEA code start
+			if (EventConfig.disableAdvDDrillBigHoleMode && toolMode == 3) toolMode = 0;
+			// TODO gamerforEA code end
 			if (toolMode > 3) toolMode = 0;
 
 			this.saveToolMode(itemStack, toolMode);
