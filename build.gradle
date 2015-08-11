@@ -29,7 +29,8 @@ minecraft {
 }
 
 dependencies {
-	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapper.jar', 'lib/GraviSuite-1.7.10-2.0.3-dev.jar', 'lib/industrialcraft-2-2.2.736-experimental-dev.jar')
+	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapper.jar')
+	compile fileTree(dir: 'lib', include: '*-dev.jar')
 }
 
 jar {
