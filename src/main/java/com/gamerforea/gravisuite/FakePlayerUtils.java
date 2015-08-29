@@ -9,7 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public final class FakePlayerUtils
 {
-	public static boolean cantBreak(EntityPlayer player, int x, int y, int z)
+	public static final boolean cantBreak(EntityPlayer player, int x, int y, int z)
 	{
 		try
 		{

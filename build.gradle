@@ -24,7 +24,7 @@ group= "gravisuite"
 archivesBaseName = "GraviSuite"
 
 minecraft {
-	version = "1.7.10-10.13.2.1291"
+	version = "1.7.10-10.13.4.1490-1.7.10"
 	runDir = "eclipse"
 }
 
@@ -34,6 +34,10 @@ dependencies {
 }
 
 jar {
-	from zipTree('lib/GraviSuite-1.7.10-2.0.3.jar')
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+	from zipTree('lib/' + archivesBaseName + '-' + version + '.jar')
+	from zipTree('lib/WorldGuardEventWrapper.jar').matching {
+		include('com/gamerforea/wgew/cauldron/event/**.class')
+	}
 }

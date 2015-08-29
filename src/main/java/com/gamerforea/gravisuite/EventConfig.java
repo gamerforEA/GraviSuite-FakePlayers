@@ -7,10 +7,11 @@ import java.io.File;
 import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraftforge.common.config.Configuration;
 
-public class EventConfig
+public final class EventConfig
 {
 	public static boolean advDDrillEvent = true;
 	public static boolean disableAdvDDrillBigHoleMode = false;
+	public static boolean disableGraviToolWrenchMode = false;
 
 	static
 	{
@@ -18,7 +19,8 @@ public class EventConfig
 		Configuration config = new Configuration(new File(mainDirectory, "config/Events/GraviSuite.cfg"));
 		config.load();
 		advDDrillEvent = config.getBoolean("advDDrillEvent", CATEGORY_GENERAL, advDDrillEvent, "Улучшенный алмазный бур");
-		disableAdvDDrillBigHoleMode = config.getBoolean("disableAdvDDrillBigHoleMode", "other", disableAdvDDrillBigHoleMode, "Выключить режим \"Большие дыры\"");
+		disableAdvDDrillBigHoleMode = config.getBoolean("disableAdvDDrillBigHoleMode", "other", disableAdvDDrillBigHoleMode, "Выключить режим улучшенного алмазного бура \"Большие дыры\"");
+		disableGraviToolWrenchMode = config.getBoolean("disableGraviToolWrenchMode", "other", disableGraviToolWrenchMode, "Выключить режим гравитационного инструмента \"Гаечный ключ\"");
 		config.save();
 	}
 }

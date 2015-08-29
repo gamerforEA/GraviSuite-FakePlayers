@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.eloraam.redpower.core.IRotatable;
+import com.gamerforea.gravisuite.EventConfig;
 import com.gamerforea.gravisuite.FakePlayerUtils;
 import com.google.common.collect.Sets;
 
@@ -131,20 +132,26 @@ public class ItemGraviTool extends ItemTool implements IElectricItem, IToolWrenc
 	{
 		if (GraviSuite.isSimulating() && Keyboard.isModeKeyDown(player))
 		{
-			Integer mode = readToolMode(stack);
-			mode = Integer.valueOf(mode.intValue() + 1);
-			if (mode.intValue() > 4)
-				mode = Integer.valueOf(1);
+			int mode = readToolMode(stack);
+			mode++;
+
+			// TODO gamerforEA code start
+			if (mode == 3 && EventConfig.disableGraviToolWrenchMode)
+				mode++;
+			// TODO gamerforEA code end
+
+			if (mode > 4)
+				mode = 1;
 
 			saveToolMode(stack, mode);
 			setToolName(stack);
-			if (mode.intValue() == 1)
+			if (mode == 1)
 				ServerProxy.sendPlayerMessage(player, "§2" + Helpers.formatMessage("graviTool.snap.Hoe") + " " + "§a" + Helpers.formatMessage("message.text.activated"));
-			else if (mode.intValue() == 2)
+			else if (mode == 2)
 				ServerProxy.sendPlayerMessage(player, "§6" + Helpers.formatMessage("graviTool.snap.TreeTap") + " " + "§a" + Helpers.formatMessage("message.text.activated"));
-			else if (mode.intValue() == 3)
+			else if (mode == 3)
 				ServerProxy.sendPlayerMessage(player, "§b" + Helpers.formatMessage("graviTool.snap.Wrench") + " " + "§a" + Helpers.formatMessage("message.text.activated"));
-			else if (mode.intValue() == 4)
+			else if (mode == 4)
 				ServerProxy.sendPlayerMessage(player, "§d" + Helpers.formatMessage("graviTool.snap.Screwdriver") + " " + "§a" + Helpers.formatMessage("message.text.activated"));
 		}
 
@@ -685,19 +692,25 @@ public class ItemGraviTool extends ItemTool implements IElectricItem, IToolWrenc
 	public static Integer readToolMode(ItemStack itemstack)
 	{
 		NBTTagCompound nbttagcompound = GraviSuite.getOrCreateNbtData(itemstack);
-		Integer toolMode = Integer.valueOf(nbttagcompound.getInteger("toolMode"));
-		if (toolMode.intValue() <= 0 || toolMode.intValue() > 4)
-			toolMode = Integer.valueOf(1);
+		int mode = nbttagcompound.getInteger("toolMode");
 
-		return toolMode;
+		// TODO gamerforEA code start
+		if (mode == 3 && EventConfig.disableGraviToolWrenchMode)
+			mode++;
+		// TODO gamerforEA code end
+
+		if (mode <= 0 || mode > 4)
+			mode = 1;
+
+		return mode;
 	}
 
 	public static Integer readTextureIndex(ItemStack itemstack)
 	{
 		NBTTagCompound nbttagcompound = GraviSuite.getOrCreateNbtData(itemstack);
-		Integer textureIndex = Integer.valueOf(nbttagcompound.getInteger("textureIndex"));
+		Integer textureIndex = nbttagcompound.getInteger("textureIndex");
 		if (textureIndex.intValue() <= 0)
-			textureIndex = Integer.valueOf(hoeTextureIndex);
+			textureIndex = hoeTextureIndex;
 
 		return textureIndex;
 	}
