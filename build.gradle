@@ -24,20 +24,15 @@ group= "gravisuite"
 archivesBaseName = "GraviSuite"
 
 minecraft {
-	version = "1.7.10-10.13.4.1490-1.7.10"
+	version = "1.7.10-10.13.4.1541-1.7.10"
 	runDir = "eclipse"
 }
 
 dependencies {
-	compile files('lib/bukkit-api.jar', 'lib/WorldGuardEventWrapper.jar')
 	compile fileTree(dir: 'lib', include: '*-dev.jar')
 }
 
 jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
 	from zipTree('lib/' + archivesBaseName + '-' + version + '.jar')
-	from zipTree('lib/WorldGuardEventWrapper.jar').matching {
-		include('com/gamerforea/wgew/cauldron/event/**.class')
-	}
 }

@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.eloraam.redpower.core.IRotatable;
+import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.gravisuite.EventConfig;
-import com.gamerforea.gravisuite.FakePlayerUtils;
 import com.google.common.collect.Sets;
 
 import buildcraft.api.tools.IToolWrench;
@@ -25,6 +25,7 @@ import ic2.api.item.ElectricItem;
 import ic2.api.item.IC2Items;
 import ic2.api.item.IElectricItem;
 import ic2.api.tile.IWrenchable;
+import ic2.core.block.machine.tileentity.TileEntityTerra;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockButton;
 import net.minecraft.block.BlockChest;
@@ -256,7 +257,7 @@ public class ItemGraviTool extends ItemTool implements IElectricItem, IToolWrenc
 		else
 		{
 			// TODO gamerforEA code start
-			if (FakePlayerUtils.cantBreak(player, x, y, z))
+			if (EventUtils.cantBreak(player, x, y, z))
 				return false;
 			// TODO gamerforEA code end
 
@@ -264,12 +265,10 @@ public class ItemGraviTool extends ItemTool implements IElectricItem, IToolWrenc
 			int meta = world.getBlockMetadata(x, y, z);
 			TileEntity tile = world.getTileEntity(x, y, z);
 
-			try
+			if (tile instanceof IWrenchable)
 			{
-				if (tile.getClass().getName() == "TileEntityTerra")
-				{
-					Method method = tile.getClass().getMethod("ejectBlueprint");
-					if ((Boolean) method.invoke(null))
+				if (tile instanceof TileEntityTerra)
+					if (((TileEntityTerra) tile).ejectBlueprint())
 					{
 						if (GraviSuite.isSimulating())
 							this.dischargeItem(stack, player, this.energyPerSwitchSide);
@@ -279,14 +278,7 @@ public class ItemGraviTool extends ItemTool implements IElectricItem, IToolWrenc
 
 						return GraviSuite.isSimulating();
 					}
-				}
-			}
-			catch (Throwable throwable)
-			{
-			}
 
-			if (tile instanceof IWrenchable)
-			{
 				IWrenchable wrenchable = (IWrenchable) tile;
 				if (Keyboard.isAltKeyDown(player))
 				{

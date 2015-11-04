@@ -2,9 +2,8 @@ package com.gamerforea.gravisuite;
 
 import static net.minecraftforge.common.config.Configuration.CATEGORY_GENERAL;
 
-import java.io.File;
+import com.gamerforea.eventhelper.util.FastUtils;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraftforge.common.config.Configuration;
 
 public final class EventConfig
@@ -15,9 +14,7 @@ public final class EventConfig
 
 	static
 	{
-		File mainDirectory = FMLCommonHandler.instance().getMinecraftServerInstance().getFile(".");
-		Configuration config = new Configuration(new File(mainDirectory, "config/Events/GraviSuite.cfg"));
-		config.load();
+		Configuration config = FastUtils.getConfig("GraviSuite");
 		advDDrillEvent = config.getBoolean("advDDrillEvent", CATEGORY_GENERAL, advDDrillEvent, "Улучшенный алмазный бур");
 		disableAdvDDrillBigHoleMode = config.getBoolean("disableAdvDDrillBigHoleMode", "other", disableAdvDDrillBigHoleMode, "Выключить режим улучшенного алмазного бура \"Большие дыры\"");
 		disableGraviToolWrenchMode = config.getBoolean("disableGraviToolWrenchMode", "other", disableGraviToolWrenchMode, "Выключить режим гравитационного инструмента \"Гаечный ключ\"");

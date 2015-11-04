@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.gravisuite.EventConfig;
-import com.gamerforea.gravisuite.FakePlayerUtils;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -190,7 +190,7 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 									if (localBlock != null && this.canHarvestBlock(localBlock, stack))
 									{
 										// TODO gamerforEA code start
-										if (EventConfig.advDDrillEvent && FakePlayerUtils.cantBreak(player, xPos, yPos, zPos))
+										if (EventConfig.advDDrillEvent && EventUtils.cantBreak(player, xPos, yPos, zPos))
 											continue;
 										// TODO gamerforEA code end
 										if (localBlock.getBlockHardness(world, xPos, yPos, zPos) >= 0F)
