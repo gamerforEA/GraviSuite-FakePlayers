@@ -41,7 +41,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 
 public class ItemAdvDDrill extends ItemTool implements IElectricItem
 {
-	public static final Set mineableBlocks = Sets.newHashSet(Blocks.grass, Blocks.dirt, Blocks.mycelium, Blocks.sand, Blocks.gravel, Blocks.snow, Blocks.snow_layer, Blocks.clay, Blocks.soul_sand);
+	public static final Set<Block> mineableBlocks = Sets.newHashSet(Blocks.grass, Blocks.dirt, Blocks.mycelium, Blocks.sand, Blocks.gravel, Blocks.snow, Blocks.snow_layer, Blocks.clay, Blocks.soul_sand);
 	private static final Set<Material> materials = Sets.newHashSet(Material.rock, Material.grass, Material.ground, Material.sand, Material.clay);
 	private static final Set<String> toolType = ImmutableSet.of("pickaxe", "shovel");
 	private float effPower = 35F;
@@ -188,28 +188,42 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 								{
 									Block localBlock = world.getBlock(xPos, yPos, zPos);
 									if (localBlock != null && this.canHarvestBlock(localBlock, stack))
-									{
-										// TODO gamerforEA code start
-										if (EventConfig.advDDrillEvent && EventUtils.cantBreak(player, xPos, yPos, zPos))
-											continue;
-										// TODO gamerforEA code end
 										if (localBlock.getBlockHardness(world, xPos, yPos, zPos) >= 0F)
 											if (materials.contains(localBlock.getMaterial()) || block == Blocks.monster_egg)
 											{
+												// TODO gamerforEA code start
+												if (EventConfig.advDDrillEvent && EventUtils.cantBreak(player, xPos, yPos, zPos))
+													continue;
+												// TODO gamerforEA code end
+
 												if (!player.capabilities.isCreativeMode)
 												{
 													int localMeta = world.getBlockMetadata(xPos, yPos, zPos);
 
+													/* TODO gamerforEA code replace, old code:
 													if (localBlock.removedByPlayer(world, player, xPos, yPos, zPos))
 														localBlock.onBlockDestroyedByPlayer(world, xPos, yPos, zPos, localMeta);
+													
+													if (!silktouch)
+														localBlock.dropXpOnBlockBreak(world, xPos, yPos, zPos, localBlock.getExpDrop(world, localMeta, fortune));
+													
+													localBlock.harvestBlock(world, player, xPos, yPos, zPos, localMeta);
+													localBlock.onBlockHarvested(world, xPos, yPos, zPos, localMeta, player);
+													if (block.getBlockHardness(world, xPos, yPos, zPos) > 0F)
+														this.onBlockDestroyed(stack, world, localBlock, xPos, yPos, zPos, player); */
+													if (localBlock.getBlockHardness(world, xPos, yPos, zPos) > 0F)
+														this.onBlockDestroyed(stack, world, localBlock, xPos, yPos, zPos, player);
 
 													if (!silktouch)
 														localBlock.dropXpOnBlockBreak(world, xPos, yPos, zPos, localBlock.getExpDrop(world, localMeta, fortune));
 
-													localBlock.harvestBlock(world, player, xPos, yPos, zPos, localMeta);
 													localBlock.onBlockHarvested(world, xPos, yPos, zPos, localMeta, player);
-													if (block.getBlockHardness(world, xPos, yPos, zPos) > 0F)
-														this.onBlockDestroyed(stack, world, localBlock, xPos, yPos, zPos, player);
+													if (localBlock.removedByPlayer(world, player, xPos, yPos, zPos, true))
+													{
+														localBlock.onBlockDestroyedByPlayer(world, xPos, yPos, zPos, localMeta);
+														localBlock.harvestBlock(world, player, xPos, yPos, zPos, localMeta);
+													}
+													// TODO gamerforEA code end
 
 													ElectricItem.manager.use(stack, this.energyPerOperation, player);
 												}
@@ -218,7 +232,6 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 
 												world.func_147479_m(xPos, yPos, zPos);
 											}
-									}
 								}
 								else
 								{
@@ -281,10 +294,12 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 	{
 		NBTTagCompound nbt = GraviSuite.getOrCreateNbtData(itemstack);
 		int toolMode = nbt.getInteger("toolMode");
+
 		// TODO gamerforEA code start
 		if (EventConfig.disableAdvDDrillBigHoleMode && toolMode == 3)
 			toolMode = 0;
 		// TODO gamerforEA code end
+
 		if (toolMode < 0 || toolMode > 3)
 			toolMode = 0;
 
@@ -337,10 +352,12 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 		if (Keyboard.isModeKeyDown(player))
 		{
 			int toolMode = readToolMode(itemStack) + 1;
+
 			// TODO gamerforEA code start
 			if (EventConfig.disableAdvDDrillBigHoleMode && toolMode == 3)
 				toolMode = 0;
 			// TODO gamerforEA code end
+
 			if (toolMode > 3)
 				toolMode = 0;
 
