@@ -67,6 +67,14 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 		this.setCreativeTab(GraviSuite.ic2Tab);
 	}
 
+	// TODO gamerforEA code start
+	@Override
+	public boolean hitEntity(ItemStack stack, EntityLivingBase damagee, EntityLivingBase damager)
+	{
+		return true;
+	}
+	// TODO gamerforEA code end
+
 	public void init()
 	{
 	}
@@ -203,10 +211,10 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 													/* TODO gamerforEA code replace, old code:
 													if (localBlock.removedByPlayer(world, player, xPos, yPos, zPos))
 														localBlock.onBlockDestroyedByPlayer(world, xPos, yPos, zPos, localMeta);
-													
+
 													if (!silktouch)
 														localBlock.dropXpOnBlockBreak(world, xPos, yPos, zPos, localBlock.getExpDrop(world, localMeta, fortune));
-													
+
 													localBlock.harvestBlock(world, player, xPos, yPos, zPos, localMeta);
 													localBlock.onBlockHarvested(world, xPos, yPos, zPos, localMeta, player);
 													if (block.getBlockHardness(world, xPos, yPos, zPos) > 0F)
