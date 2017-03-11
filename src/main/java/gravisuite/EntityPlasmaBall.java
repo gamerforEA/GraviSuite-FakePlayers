@@ -1,5 +1,11 @@
 package gravisuite;
 
+import com.gamerforea.eventhelper.fake.FakePlayerContainer;
+import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
+import com.gamerforea.eventhelper.util.EventUtils;
+import com.gamerforea.eventhelper.util.FastUtils;
+import com.gamerforea.gravisuite.ModUtils;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.item.ElectricItem;
@@ -29,6 +35,10 @@ public class EntityPlasmaBall extends EntityThrowable
 	public static final byte RELOCATOR_TELEPORT = 0;
 	public static final byte RELOCATOR_PORTAL = 1;
 
+	// TODO gamerforEA code start
+	public final FakePlayerContainer fake = new FakePlayerContainerEntity(ModUtils.profile, this);
+	// TODO gamerforEA code end
+
 	public EntityPlasmaBall(World world, EntityLivingBase entityLiving, ItemRelocator.TeleportPoint tpPoint, byte entityType)
 	{
 		super(world, entityLiving);
@@ -42,6 +52,11 @@ public class EntityPlasmaBall extends EntityThrowable
 		this.actionType = entityType;
 		this.dischargeArmorValue = 500000.0D;
 		super.dataWatcher.updateObject(30, Byte.valueOf(this.actionType));
+
+		// TODO gamerforEA code start
+		if (entityLiving instanceof EntityPlayer)
+			this.fake.setRealPlayer((EntityPlayer) entityLiving);
+		// TODO gamerforEA code end
 	}
 
 	public EntityPlasmaBall(World world)
@@ -90,6 +105,10 @@ public class EntityPlasmaBall extends EntityThrowable
 	{
 		super.writeToNBT(nbt);
 		nbt.setByte("actionType", this.actionType);
+
+		// TODO gamerforEA code start
+		this.fake.writeToNBT(nbt);
+		// TODO gamerforEA code end
 	}
 
 	@Override
@@ -97,6 +116,10 @@ public class EntityPlasmaBall extends EntityThrowable
 	{
 		super.readFromNBT(nbt);
 		this.actionType = nbt.getByte("actionType");
+
+		// TODO gamerforEA code start
+		this.fake.readFromNBT(nbt);
+		// TODO gamerforEA code end
 	}
 
 	public byte getActionType()
@@ -110,6 +133,15 @@ public class EntityPlasmaBall extends EntityThrowable
 		if (mop.entityHit != null)
 		{
 			if (this.actionType == 0)
+			{
+				// TODO gamerforEA code start
+				if (this.fake.cantDamage(mop.entityHit))
+				{
+					this.setDead();
+					return;
+				}
+				// TODO gamerforEA code end
+
 				if (mop.entityHit instanceof EntityPlayer)
 				{
 					EntityPlayer player = (EntityPlayer) mop.entityHit;
@@ -121,6 +153,7 @@ public class EntityPlasmaBall extends EntityThrowable
 						else if (GraviSuite.isSimulating())
 						{
 							// TODO gamerforEA code clear: EntityClientPlayerMP senderPlayer = (EntityClientPlayerMP) this.ownerEntity;
+
 							ServerProxy.sendPlayerMessage(player, this.ownerEntity.getCommandSenderName() + " " + Helpers.formatMessage("message.relocator.text.messageToTarget"));
 							ElectricItem.manager.discharge(itemstack, this.dischargeArmorValue, Integer.MAX_VALUE, true, false, false);
 						}
@@ -130,6 +163,7 @@ public class EntityPlasmaBall extends EntityThrowable
 				}
 				else
 					Helpers.teleportEntity(mop.entityHit, this.targetTpPoint);
+			}
 		}
 		else if (this.actionType == 1)
 		{
@@ -160,12 +194,29 @@ public class EntityPlasmaBall extends EntityThrowable
 			if (GraviSuite.isSimulating())
 				try
 				{
+					// TODO gamerforEA code start
+					if (this.fake.cantBreak(curPosX, curPosY, curPosZ))
+					{
+						this.setDead();
+						return;
+					}
+					// TODO gamerforEA code end
+
 					super.worldObj.setBlockToAir(curPosX, curPosY, curPosZ);
 					super.worldObj.setBlock(curPosX, curPosY, curPosZ, GraviSuite.blockRelocatorPortal);
 					super.worldObj.markBlockForUpdate(curPosX, curPosY, curPosZ);
 					MinecraftServer minecraftserver = MinecraftServer.getServer();
 					WorldServer targetServer = minecraftserver.worldServerForDimension(this.targetTpPoint.dimID);
 					targetServer.theChunkProviderServer.loadChunk((int) this.targetTpPoint.x >> 4, (int) this.targetTpPoint.z >> 4);
+
+					// TODO gamerforEA code start
+					if (EventUtils.cantBreak(FastUtils.getFake(targetServer, this.fake.getPlayer()), (int) this.targetTpPoint.x, (int) this.targetTpPoint.y, (int) this.targetTpPoint.z))
+					{
+						this.setDead();
+						return;
+					}
+					// TODO gamerforEA code end
+
 					Block block = targetServer.getBlock((int) this.targetTpPoint.x, (int) this.targetTpPoint.y, (int) this.targetTpPoint.z);
 					if (!(block instanceof BlockRelocatorPortal))
 					{
@@ -188,9 +239,8 @@ public class EntityPlasmaBall extends EntityThrowable
 					if (tileEntity instanceof TileEntityRelocatorPortal)
 						((TileEntityRelocatorPortal) currentTileEntity).setParentPortal(this.targetTpPoint);
 				}
-				catch (Exception var10)
+				catch (Exception ignore)
 				{
-					;
 				}
 		}
 
