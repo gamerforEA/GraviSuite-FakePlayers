@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import com.gamerforea.eventhelper.util.EventUtils;
+import com.gamerforea.gravisuite.EventConfig;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gravisuite.keyboard.Keyboard;
@@ -91,80 +94,83 @@ public class ItemVajra extends ItemTool implements IElectricItem
 	}
 
 	@Override
-	public boolean onItemUse(ItemStack itemstack, EntityPlayer entityplayer, World world, int i, int j, int k, int side, float a, float b, float c)
+	public boolean onItemUse(ItemStack itemstack, EntityPlayer player, World world, int x, int y, int z, int side, float a, float b, float c)
 	{
-		Integer toolMode = readToolMode(itemstack);
-		if (!GraviSuite.disableVajraAccurate && toolMode.intValue() == 1)
+		int toolMode = readToolMode(itemstack);
+		if (!GraviSuite.disableVajraAccurate && toolMode == 1)
 			try
 			{
-				int metaData = world.getBlockMetadata(i, j, k);
-				Block block = world.getBlock(i, j, k);
-				if (block != Blocks.bedrock && block != Blocks.mob_spawner && block.canHarvestBlock(entityplayer, metaData) && block.getItemDropped(metaData, world.rand, 1) != null)
+				int meta = world.getBlockMetadata(x, y, z);
+				Block block = world.getBlock(x, y, z);
+				if (block != Blocks.bedrock && block != Blocks.mob_spawner && block.canHarvestBlock(player, meta) && block.getItemDropped(meta, world.rand, 1) != null)
 				{
 					if (!ElectricItem.manager.canUse(itemstack, this.energyPerOperation))
-					{
-						boolean var25 = false;
-						return var25;
-					}
+						return false;
 
 					if (GraviSuite.isSimulating())
 					{
+						// TODO gamerforEA code start
+						if (EventConfig.inList(EventConfig.vajraSilkBlackList, block, meta))
+							return false;
+						if (EventUtils.cantBreak(player, x, y, z))
+							return false;
+						// TODO gamerforEA code end
+
 						boolean dropFlag = false;
-						if (block.canSilkHarvest(world, entityplayer, i, j, k, metaData))
+						if (block.canSilkHarvest(world, player, x, y, z, meta))
 						{
 							ArrayList<ItemStack> items = new ArrayList();
-							ItemStack stack = this.createStackedBlock(block, metaData);
+							ItemStack stack = this.createStackedBlock(block, meta);
 							if (stack != null)
 								items.add(stack);
 
-							ForgeEventFactory.fireBlockHarvesting(items, world, block, i, j, k, metaData, 0, 1.0F, true, entityplayer);
+							ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0F, true, player);
 
 							for (ItemStack is : items)
-								ItemGraviTool.dropAsEntity(world, i, j, k, is);
+								ItemGraviTool.dropAsEntity(world, x, y, z, is);
 
 							dropFlag = true;
 						}
 						else
 						{
-							int count = block.quantityDropped(metaData, EnchantmentHelper.getEnchantmentLevel(Enchantment.fortune.effectId, itemstack), world.rand);
+							int count = block.quantityDropped(meta, EnchantmentHelper.getEnchantmentLevel(Enchantment.fortune.effectId, itemstack), world.rand);
 							if (count > 0)
 							{
-								int exp = block.getExpDrop(world, metaData, EnchantmentHelper.getEnchantmentLevel(Enchantment.fortune.effectId, itemstack));
-								block.dropXpOnBlockBreak(world, i, j, k, exp);
+								int exp = block.getExpDrop(world, meta, EnchantmentHelper.getEnchantmentLevel(Enchantment.fortune.effectId, itemstack));
+								block.dropXpOnBlockBreak(world, x, y, z, exp);
 
 								/* TODO gamerforEA code replace, old code:
 								block.harvestBlock(world, entityplayer, i, j, k, metaData);
 								block.onBlockHarvested(world, i, j, k, metaData, entityplayer);
 								float blockHardness = block.getBlockHardness(world, i, j, k); */
-								float blockHardness = block.getBlockHardness(world, i, j, k);
+								float blockHardness = block.getBlockHardness(world, x, y, z);
 
-								block.onBlockHarvested(world, i, j, k, metaData, entityplayer);
-								if (block.removedByPlayer(world, entityplayer, i, j, k, true))
+								block.onBlockHarvested(world, x, y, z, meta, player);
+								if (block.removedByPlayer(world, player, x, y, z, true))
 								{
-									block.onBlockDestroyedByPlayer(world, i, j, k, metaData);
-									block.harvestBlock(world, entityplayer, i, j, k, metaData);
+									block.onBlockDestroyedByPlayer(world, x, y, z, meta);
+									block.harvestBlock(world, player, x, y, z, meta);
 								}
 								// TODO gamerforEA code end
 
 								if (blockHardness > 0.0F)
-									this.onBlockDestroyed(itemstack, world, block, i, j, k, entityplayer);
+									this.onBlockDestroyed(itemstack, world, block, x, y, z, player);
 
-								world.func_147479_m(i, j, k);
+								world.func_147479_m(x, y, z);
 								dropFlag = true;
 							}
 						}
 
 						if (dropFlag)
 						{
-							world.setBlockToAir(i, j, k);
-							world.func_147479_m(i, j, k);
-							world.playAuxSFX(2001, i, j, k, Block.getIdFromBlock(block) + (metaData << 12));
-							ElectricItem.manager.use(itemstack, this.energyPerOperation, entityplayer);
+							world.setBlockToAir(x, y, z);
+							world.func_147479_m(x, y, z);
+							world.playAuxSFX(2001, x, y, z, Block.getIdFromBlock(block) + (meta << 12));
+							ElectricItem.manager.use(itemstack, this.energyPerOperation, player);
 						}
 					}
 
-					boolean var24 = true;
-					return var24;
+					return true;
 				}
 			}
 			catch (Exception var22)

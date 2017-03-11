@@ -149,7 +149,7 @@ public class Helpers
 	public static Entity teleportEntity(Entity entity, ItemRelocator.TeleportPoint tpPoint)
 	{
 		// TODO gamerforEA code start
-		if (entity == null || entity.worldObj == null || entity.worldObj.provider == null)
+		if (entity == null || entity.worldObj == null)
 			return entity;
 		if (tpPoint == null)
 			return entity;
