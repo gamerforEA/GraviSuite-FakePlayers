@@ -1,14 +1,9 @@
 package gravisuite;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.gravisuite.EventConfig;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gravisuite.keyboard.Keyboard;
@@ -26,18 +21,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.EnumRarity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemTool;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ItemAdvDDrill extends ItemTool implements IElectricItem
 {
@@ -63,7 +59,7 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 	{
 		super(0F, toolMaterial, new HashSet());
 		this.setMaxDamage(27);
-		super.efficiencyOnProperMaterial = this.normalPower;
+		this.efficiencyOnProperMaterial = this.normalPower;
 		this.setCreativeTab(GraviSuite.ic2Tab);
 	}
 
@@ -118,13 +114,13 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 	@Override
 	public float getDigSpeed(ItemStack tool, Block block, int meta)
 	{
-		return !ElectricItem.manager.canUse(tool, this.energyPerOperation) ? 1F : this.canHarvestBlock(block, tool) ? super.efficiencyOnProperMaterial : 1F;
+		return !ElectricItem.manager.canUse(tool, this.energyPerOperation) ? 1F : this.canHarvestBlock(block, tool) ? this.efficiencyOnProperMaterial : 1F;
 	}
 
 	@Override
 	public int getHarvestLevel(ItemStack stack, String toolType)
 	{
-		return !toolType.equals("pickaxe") && !toolType.equals("shovel") ? super.getHarvestLevel(stack, toolType) : super.toolMaterial.getHarvestLevel();
+		return !toolType.equals("pickaxe") && !toolType.equals("shovel") ? super.getHarvestLevel(stack, toolType) : this.toolMaterial.getHarvestLevel();
 	}
 
 	public boolean hitEntity(ItemStack stack, EntityLiving entity1, EntityLiving entity2)
@@ -147,7 +143,7 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister register)
 	{
-		super.itemIcon = register.registerIcon("gravisuite:itemAdvancedDDrill");
+		this.itemIcon = register.registerIcon("gravisuite:itemAdvancedDDrill");
 	}
 
 	@Override
@@ -190,8 +186,11 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 					int fortune = EnchantmentHelper.getFortuneModifier(player);
 
 					for (int xPos = x - xRange; xPos <= x + xRange; ++xPos)
+					{
 						for (int yPos = y - yRange; yPos <= y + yRange; ++yPos)
+						{
 							for (int zPos = z - zRange; zPos <= z + zRange; ++zPos)
+							{
 								if (ElectricItem.manager.canUse(stack, this.energyPerOperation))
 								{
 									Block localBlock = world.getBlock(xPos, yPos, zPos);
@@ -201,7 +200,11 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 											{
 												// TODO gamerforEA code start
 												if (EventConfig.advDDrillEvent && EventUtils.cantBreak(player, xPos, yPos, zPos))
+												{
+													if (player instanceof EntityPlayerMP)
+														((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new S23PacketBlockChange(xPos, yPos, zPos, world));
 													continue;
+												}
 												// TODO gamerforEA code end
 
 												if (!player.capabilities.isCreativeMode)
@@ -246,6 +249,9 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 									lowPower = true;
 									break;
 								}
+							}
+						}
+					}
 
 					if (lowPower)
 						ServerProxy.sendPlayerMessage(player, "Not enough energy to complete this operation !");
@@ -374,19 +380,19 @@ public class ItemAdvDDrill extends ItemTool implements IElectricItem
 			{
 				case 0:
 					ServerProxy.sendPlayerMessage(player, EnumChatFormatting.GREEN + Helpers.formatMessage("message.text.mode") + ": " + Helpers.formatMessage("message.advDDrill.mode.normal"));
-					super.efficiencyOnProperMaterial = this.normalPower;
+					this.efficiencyOnProperMaterial = this.normalPower;
 					break;
 				case 1:
 					ServerProxy.sendPlayerMessage(player, EnumChatFormatting.GOLD + Helpers.formatMessage("message.text.mode") + ": " + Helpers.formatMessage("message.advDDrill.mode.lowPower"));
-					super.efficiencyOnProperMaterial = this.lowPower;
+					this.efficiencyOnProperMaterial = this.lowPower;
 					break;
 				case 2:
 					ServerProxy.sendPlayerMessage(player, EnumChatFormatting.AQUA + Helpers.formatMessage("message.text.mode") + ": " + Helpers.formatMessage("message.advDDrill.mode.fine"));
-					super.efficiencyOnProperMaterial = this.ultraLowPower;
+					this.efficiencyOnProperMaterial = this.ultraLowPower;
 					break;
 				case 3:
 					ServerProxy.sendPlayerMessage(player, EnumChatFormatting.LIGHT_PURPLE + Helpers.formatMessage("message.text.mode") + ": " + Helpers.formatMessage("message.advDDrill.mode.bigHoles"));
-					super.efficiencyOnProperMaterial = this.bigHolePower;
+					this.efficiencyOnProperMaterial = this.bigHolePower;
 					break;
 			}
 		}
