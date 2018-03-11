@@ -1,14 +1,9 @@
 package gravisuite;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.eventhelper.util.FastUtils;
 import com.gamerforea.gravisuite.EventConfig;
 import com.google.common.collect.Lists;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gravisuite.keyboard.Keyboard;
@@ -18,6 +13,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
@@ -30,6 +26,10 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 public class ItemRelocator extends ItemTool implements IElectricItem
 {
@@ -57,24 +57,32 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 		this.setMaxDamage(27);
 	}
 
+	// TODO gamerforEA code start
+	@Override
+	public boolean hitEntity(ItemStack stack, EntityLivingBase damagee, EntityLivingBase damager)
+	{
+		return true;
+	}
+	// TODO gamerforEA code end
+
 	@Override
 	public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player)
 	{
 		if (Keyboard.isModeKeyDown(player))
 		{
 			Integer toolMode = readToolMode(itemStack);
-			toolMode = Integer.valueOf(toolMode.intValue() + 1);
-			if (toolMode.intValue() > 2)
-				toolMode = Integer.valueOf(0);
+			toolMode = toolMode + 1;
+			if (toolMode > 2)
+				toolMode = 0;
 
 			this.saveToolMode(itemStack, toolMode);
-			if (toolMode.intValue() == 0)
+			if (toolMode == 0)
 				ServerProxy.sendPlayerMessage(player, EnumChatFormatting.GREEN + Helpers.formatMessage("message.text.mode") + ": " + Helpers.formatMessage("message.relocator.mode.personal"));
 
-			if (toolMode.intValue() == 1)
+			if (toolMode == 1)
 				ServerProxy.sendPlayerMessage(player, EnumChatFormatting.GOLD + Helpers.formatMessage("message.text.mode") + ": " + Helpers.formatMessage("message.relocator.mode.translocator"));
 
-			if (toolMode.intValue() == 2)
+			if (toolMode == 2)
 				ServerProxy.sendPlayerMessage(player, EnumChatFormatting.AQUA + Helpers.formatMessage("message.text.mode") + ": " + Helpers.formatMessage("message.relocator.mode.portal"));
 
 			return itemStack;
@@ -84,21 +92,21 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 			Integer toolMode = readToolMode(itemStack);
 			if (player.isSneaking())
 			{
-				if (toolMode.intValue() != 1 && toolMode.intValue() != 2)
+				if (toolMode != 1 && toolMode != 2)
 					player.openGui(GraviSuite.instance, 1, world, (int) player.posX, (int) player.posY, (int) player.posZ);
 				else
 					player.openGui(GraviSuite.instance, 3, world, (int) player.posX, (int) player.posY, (int) player.posZ);
 			}
-			else if (toolMode.intValue() == 0)
+			else if (toolMode == 0)
 				player.openGui(GraviSuite.instance, 2, world, (int) player.posX, (int) player.posY, (int) player.posZ);
-			else if (toolMode.intValue() == 1 || toolMode.intValue() == 2)
+			else if (toolMode == 1 || toolMode == 2)
 			{
 				ItemRelocator.TeleportPoint tpPoint = getDefaultPoint(itemStack);
 				if (tpPoint != null)
 				{
 					int energyPerOperation = 0;
 					byte launchType = 0;
-					if (toolMode.intValue() == 1)
+					if (toolMode == 1)
 					{
 						energyPerOperation = this.energyPerShoot;
 						launchType = 0;
@@ -206,17 +214,19 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 				ServerProxy.sendPlayerMessage(player, EnumChatFormatting.RED + Helpers.formatMessage("message.relocator.text.memoryFull"));
 			else
 			{
-				Boolean pointExists = Boolean.valueOf(false);
+				Boolean pointExists = Boolean.FALSE;
 
 				for (ItemRelocator.TeleportPoint point : tpList)
+				{
 					if (point.pointName.equalsIgnoreCase(newPoint.pointName))
 					{
 						ServerProxy.sendPlayerMessage(player, EnumChatFormatting.YELLOW + newPoint.pointName + " " + EnumChatFormatting.RED + Helpers.formatMessage("message.relocator.text.pointExists"));
-						pointExists = Boolean.valueOf(true);
+						pointExists = Boolean.TRUE;
 						return;
 					}
+				}
 
-				if (!pointExists.booleanValue())
+				if (!pointExists)
 				{
 					// TODO gamerforEA code start
 					if (EventConfig.relocatorToEvent)
@@ -254,8 +264,10 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 			tpList.addAll(loadTeleportPoints(itemStack));
 
 			for (ItemRelocator.TeleportPoint point : tpList)
+			{
 				if (point.defPoint)
 					return point;
+			}
 
 			return null;
 		}
@@ -264,23 +276,25 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 	public static Boolean setDefaultPoint(EntityPlayer player, ItemStack itemStack, String ptName)
 	{
 		if (itemStack == null)
-			return Boolean.valueOf(false);
+			return Boolean.FALSE;
 		else
 		{
 			List<ItemRelocator.TeleportPoint> tpList = Lists.newArrayList();
 			tpList.addAll(loadTeleportPoints(itemStack));
-			Boolean pointExists = Boolean.valueOf(false);
+			Boolean pointExists = Boolean.FALSE;
 
 			for (ItemRelocator.TeleportPoint point : tpList)
+			{
 				if (point.pointName.equalsIgnoreCase(ptName))
 				{
 					point.defPoint = true;
-					pointExists = Boolean.valueOf(true);
+					pointExists = Boolean.TRUE;
 				}
 				else
 					point.defPoint = false;
+			}
 
-			if (pointExists.booleanValue())
+			if (pointExists)
 			{
 				saveTeleportPoints(itemStack, tpList);
 				ServerProxy.sendPlayerMessage(player, EnumChatFormatting.WHITE + Helpers.formatMessage("message.relocator.text.defaultPointSet") + " " + EnumChatFormatting.YELLOW + ptName);
@@ -300,8 +314,10 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 			tpList.addAll(loadTeleportPoints(itemStack));
 
 			for (ItemRelocator.TeleportPoint point : tpList)
+			{
 				if (point.pointName.equalsIgnoreCase(ptName))
 					return point;
+			}
 
 			return null;
 		}
@@ -316,7 +332,7 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 			List<ItemRelocator.TeleportPoint> tpList = Lists.newArrayList();
 			tpList.addAll(loadTeleportPoints(itemStack));
 
-			for (int i = 0; i < ((List) tpList).size(); ++i)
+			for (int i = 0; i < tpList.size(); ++i)
 			{
 				ItemRelocator.TeleportPoint tmpPoint = tpList.get(i);
 				if (tmpPoint.pointName.equalsIgnoreCase(tpName))
@@ -398,13 +414,17 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 		int j1 = MathHelper.floor_double(axisalignedbb.maxZ + 1.0D);
 
 		for (int k1 = i; k1 < j; ++k1)
+		{
 			for (int l1 = i1; l1 < j1; ++l1)
+			{
 				for (int i2 = k - 1; i2 < l; ++i2)
 				{
 					Block block = world.getBlock(k1, i2, l1);
 					if (block != null)
 						block.addCollisionBoxesToList(world, k1, i2, l1, axisalignedbb, collidingBoundingBoxes, entity);
 				}
+			}
+		}
 
 		return collidingBoundingBoxes;
 	}
@@ -412,9 +432,9 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 	public static Integer readToolMode(ItemStack itemstack)
 	{
 		NBTTagCompound nbttagcompound = GraviSuite.getOrCreateNbtData(itemstack);
-		Integer toolMode = Integer.valueOf(nbttagcompound.getInteger("toolMode"));
-		if (toolMode.intValue() < 0 || toolMode.intValue() > 3)
-			toolMode = Integer.valueOf(0);
+		Integer toolMode = nbttagcompound.getInteger("toolMode");
+		if (toolMode < 0 || toolMode > 3)
+			toolMode = 0;
 
 		return toolMode;
 	}
@@ -422,7 +442,7 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 	public void saveToolMode(ItemStack itemstack, Integer toolMode)
 	{
 		NBTTagCompound nbttagcompound = GraviSuite.getOrCreateNbtData(itemstack);
-		nbttagcompound.setInteger("toolMode", toolMode.intValue());
+		nbttagcompound.setInteger("toolMode", toolMode);
 	}
 
 	@Override
@@ -431,13 +451,13 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 	{
 		super.addInformation(par1ItemStack, par2EntityPlayer, par3List, par4);
 		Integer toolMode = readToolMode(par1ItemStack);
-		if (toolMode.intValue() == 0)
+		if (toolMode == 0)
 			par3List.add(EnumChatFormatting.GOLD + Helpers.formatMessage("message.text.mode") + ": " + EnumChatFormatting.WHITE + Helpers.formatMessage("message.relocator.mode.personal"));
 
-		if (toolMode.intValue() == 1)
+		if (toolMode == 1)
 			par3List.add(EnumChatFormatting.GOLD + Helpers.formatMessage("message.text.mode") + ": " + EnumChatFormatting.WHITE + Helpers.formatMessage("message.relocator.mode.translocator"));
 
-		if (toolMode.intValue() == 2)
+		if (toolMode == 2)
 			par3List.add(EnumChatFormatting.GOLD + Helpers.formatMessage("message.text.mode") + ": " + EnumChatFormatting.WHITE + Helpers.formatMessage("message.relocator.mode.portal"));
 
 		ItemRelocator.TeleportPoint tpPoint = getDefaultPoint(par1ItemStack);
@@ -500,7 +520,7 @@ public class ItemRelocator extends ItemTool implements IElectricItem
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister par1IconRegister)
 	{
-		super.itemIcon = par1IconRegister.registerIcon("gravisuite:itemRelocator");
+		this.itemIcon = par1IconRegister.registerIcon("gravisuite:itemRelocator");
 	}
 
 	@Override
