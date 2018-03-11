@@ -1,12 +1,7 @@
 package gravisuite;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.gravisuite.EventConfig;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gravisuite.keyboard.Keyboard;
@@ -30,6 +25,10 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.event.ForgeEventFactory;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 public class ItemVajra extends ItemTool implements IElectricItem
 {
 	private int maxCharge;
@@ -47,7 +46,7 @@ public class ItemVajra extends ItemTool implements IElectricItem
 		this.tier = 2;
 		this.transferLimit = '\uea60';
 		this.effPower = 20000.0F;
-		super.efficiencyOnProperMaterial = this.effPower;
+		this.efficiencyOnProperMaterial = this.effPower;
 		this.energyPerOperation = 3333;
 		this.setCreativeTab(GraviSuite.ic2Tab);
 		this.toolMode = 0;
@@ -56,9 +55,9 @@ public class ItemVajra extends ItemTool implements IElectricItem
 	public static Integer readToolMode(ItemStack itemstack)
 	{
 		NBTTagCompound nbttagcompound = GraviSuite.getOrCreateNbtData(itemstack);
-		Integer toolMode = Integer.valueOf(nbttagcompound.getInteger("toolMode"));
-		if (toolMode.intValue() < 0 || toolMode.intValue() > 1)
-			toolMode = Integer.valueOf(0);
+		Integer toolMode = nbttagcompound.getInteger("toolMode");
+		if (toolMode < 0 || toolMode > 1)
+			toolMode = 0;
 
 		return toolMode;
 	}
@@ -66,7 +65,7 @@ public class ItemVajra extends ItemTool implements IElectricItem
 	public void saveToolMode(ItemStack itemstack, Integer toolMode)
 	{
 		NBTTagCompound nbttagcompound = GraviSuite.getOrCreateNbtData(itemstack);
-		nbttagcompound.setInteger("toolMode", toolMode.intValue());
+		nbttagcompound.setInteger("toolMode", toolMode);
 	}
 
 	@Override
@@ -76,15 +75,15 @@ public class ItemVajra extends ItemTool implements IElectricItem
 			if (!GraviSuite.disableVajraAccurate)
 			{
 				Integer toolMode = readToolMode(itemStack);
-				toolMode = Integer.valueOf(toolMode.intValue() + 1);
-				if (toolMode.intValue() > 1)
-					toolMode = Integer.valueOf(0);
+				toolMode = toolMode + 1;
+				if (toolMode > 1)
+					toolMode = 0;
 
 				this.saveToolMode(itemStack, toolMode);
-				if (toolMode.intValue() == 0)
+				if (toolMode == 0)
 					ServerProxy.sendPlayerMessage(player, EnumChatFormatting.GOLD + Helpers.formatMessage("message.vajra.silkTouchMode") + ": " + EnumChatFormatting.RED + Helpers.formatMessage("message.text.disabled"));
 
-				if (toolMode.intValue() == 1)
+				if (toolMode == 1)
 					ServerProxy.sendPlayerMessage(player, EnumChatFormatting.GOLD + Helpers.formatMessage("message.vajra.silkTouchMode") + ": " + EnumChatFormatting.GREEN + Helpers.formatMessage("message.text.enabled"));
 			}
 			else
@@ -110,6 +109,8 @@ public class ItemVajra extends ItemTool implements IElectricItem
 					if (GraviSuite.isSimulating())
 					{
 						// TODO gamerforEA code start
+						if (block.getBlockHardness(world, x, y, z) < 0)
+							return false;
 						if (EventConfig.inList(EventConfig.vajraSilkBlackList, block, meta))
 							return false;
 						if (EventUtils.cantBreak(player, x, y, z))
@@ -127,7 +128,9 @@ public class ItemVajra extends ItemTool implements IElectricItem
 							ForgeEventFactory.fireBlockHarvesting(items, world, block, x, y, z, meta, 0, 1.0F, true, player);
 
 							for (ItemStack is : items)
+							{
 								ItemGraviTool.dropAsEntity(world, x, y, z, is);
+							}
 
 							dropFlag = true;
 						}
@@ -179,7 +182,6 @@ public class ItemVajra extends ItemTool implements IElectricItem
 			}
 			finally
 			{
-				;
 			}
 
 		return false;
@@ -228,13 +230,13 @@ public class ItemVajra extends ItemTool implements IElectricItem
 	@Override
 	public int getHarvestLevel(ItemStack stack, String toolClass)
 	{
-		return super.toolMaterial.getHarvestLevel();
+		return this.toolMaterial.getHarvestLevel();
 	}
 
 	@Override
 	public float getDigSpeed(ItemStack tool, Block block, int meta)
 	{
-		return !ElectricItem.manager.canUse(tool, this.energyPerOperation) ? 1.0F : this.canHarvestBlock(block, tool) ? super.efficiencyOnProperMaterial : 1.0F;
+		return !ElectricItem.manager.canUse(tool, this.energyPerOperation) ? 1.0F : this.canHarvestBlock(block, tool) ? this.efficiencyOnProperMaterial : 1.0F;
 	}
 
 	@Override
@@ -252,7 +254,7 @@ public class ItemVajra extends ItemTool implements IElectricItem
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IIconRegister iconRegister)
 	{
-		super.itemIcon = iconRegister.registerIcon("gravisuite:itemVajra");
+		this.itemIcon = iconRegister.registerIcon("gravisuite:itemVajra");
 	}
 
 	public float getStrVsBlock(ItemStack itemstack, Block par2Block)
@@ -297,10 +299,10 @@ public class ItemVajra extends ItemTool implements IElectricItem
 	{
 		super.addInformation(par1ItemStack, par2EntityPlayer, par3List, par4);
 		Integer toolMode = readToolMode(par1ItemStack);
-		if (toolMode.intValue() == 0)
+		if (toolMode == 0)
 			par3List.add(EnumChatFormatting.GOLD + Helpers.formatMessage("message.vajra.silkTouchMode") + ": " + EnumChatFormatting.RED + Helpers.formatMessage("message.text.disabled"));
 
-		if (toolMode.intValue() == 1)
+		if (toolMode == 1)
 			par3List.add(EnumChatFormatting.GOLD + Helpers.formatMessage("message.vajra.silkTouchMode") + ": " + EnumChatFormatting.GREEN + Helpers.formatMessage("message.text.enabled"));
 
 	}
