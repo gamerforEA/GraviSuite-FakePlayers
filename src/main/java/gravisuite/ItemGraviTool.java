@@ -1,18 +1,10 @@
 package gravisuite;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
+import buildcraft.api.tools.IToolWrench;
 import com.eloraam.redpower.core.IRotatable;
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.gravisuite.EventConfig;
 import com.google.common.collect.Sets;
-
-import buildcraft.api.tools.IToolWrench;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -36,11 +28,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.EnumRarity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemTool;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
@@ -49,6 +37,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.event.entity.player.UseHoeEvent;
+
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class ItemGraviTool extends ItemTool implements IElectricItem, IToolWrench
 {
@@ -72,7 +63,7 @@ public class ItemGraviTool extends ItemTool implements IElectricItem, IToolWrenc
 	{
 		super(0F, toolMaterial, new HashSet());
 		this.setMaxDamage(27);
-		super.efficiencyOnProperMaterial = 16F;
+		this.efficiencyOnProperMaterial = 16F;
 		this.setCreativeTab(GraviSuite.ic2Tab);
 		this.addTexturesPath();
 	}
@@ -335,7 +326,9 @@ public class ItemGraviTool extends ItemTool implements IElectricItem, IToolWrenc
 								drops.set(0, wrenchable.getWrenchDrop(player));
 
 						for (ItemStack itemStack : drops)
+						{
 							dropAsEntity(world, x, y, z, itemStack);
+						}
 
 						world.setBlockToAir(x, y, z);
 					}
@@ -779,7 +772,7 @@ public class ItemGraviTool extends ItemTool implements IElectricItem, IToolWrenc
 		iconsList[1] = iconRegister.registerIcon("gravisuite:itemGraviToolTreeTap");
 		iconsList[2] = iconRegister.registerIcon("gravisuite:itemGraviToolWrench");
 		iconsList[3] = iconRegister.registerIcon("gravisuite:itemGraviToolScrewdriver");
-		super.itemIcon = iconsList[0];
+		this.itemIcon = iconsList[0];
 	}
 
 	@Override

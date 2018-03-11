@@ -1,10 +1,5 @@
 package gravisuite;
 
-import java.awt.Color;
-import java.util.List;
-
-import org.lwjgl.opengl.GL11;
-
 import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -26,6 +21,10 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.lwjgl.opengl.GL11;
+
+import java.awt.*;
+import java.util.List;
 
 public class Helpers
 {
@@ -47,7 +46,7 @@ public class Helpers
 
 	public static String formatMessage(String inputString)
 	{
-		ChatComponentTranslation cht = new ChatComponentTranslation(inputString, new Object[0]);
+		ChatComponentTranslation cht = new ChatComponentTranslation(inputString);
 		return StatCollector.translateToLocal(cht.getUnformattedTextForChat());
 	}
 
@@ -163,7 +162,7 @@ public class Helpers
 			Entity mount = entity.ridingEntity;
 			if (entity.ridingEntity != null)
 			{
-				entity.mountEntity((Entity) null);
+				entity.mountEntity(null);
 				mount = teleportEntity(mount, tpPoint);
 			}
 
@@ -224,7 +223,7 @@ public class Helpers
 			Entity mount = entity.ridingEntity;
 			if (entity.ridingEntity != null)
 			{
-				entity.mountEntity((Entity) null);
+				entity.mountEntity(null);
 				mount = teleportToDimensionNew(mount, tpPoint);
 			}
 

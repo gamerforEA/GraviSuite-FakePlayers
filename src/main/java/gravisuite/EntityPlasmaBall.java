@@ -5,7 +5,6 @@ import com.gamerforea.eventhelper.fake.FakePlayerContainerEntity;
 import com.gamerforea.eventhelper.util.EventUtils;
 import com.gamerforea.eventhelper.util.FastUtils;
 import com.gamerforea.gravisuite.ModUtils;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.item.ElectricItem;
@@ -43,15 +42,15 @@ public class EntityPlasmaBall extends EntityThrowable
 	{
 		super(world, entityLiving);
 		this.ownerEntity = entityLiving;
-		this.startX = super.posX;
-		this.startY = super.posY;
-		this.startZ = super.posZ;
+		this.startX = this.posX;
+		this.startY = this.posY;
+		this.startZ = this.posZ;
 		this.maxRange = 32.0D;
 		this.speedPerTick = 1.33D;
 		this.targetTpPoint = tpPoint;
 		this.actionType = entityType;
 		this.dischargeArmorValue = 500000.0D;
-		super.dataWatcher.updateObject(30, Byte.valueOf(this.actionType));
+		this.dataWatcher.updateObject(30, Byte.valueOf(this.actionType));
 
 		// TODO gamerforEA code start
 		if (entityLiving instanceof EntityPlayer)
@@ -68,8 +67,8 @@ public class EntityPlasmaBall extends EntityThrowable
 	protected void entityInit()
 	{
 		super.entityInit();
-		super.dataWatcher.addObject(30, Byte.valueOf(this.actionType));
-		super.dataWatcher.setObjectWatched(30);
+		this.dataWatcher.addObject(30, Byte.valueOf(this.actionType));
+		this.dataWatcher.setObjectWatched(30);
 	}
 
 	@Override
@@ -89,13 +88,13 @@ public class EntityPlasmaBall extends EntityThrowable
 	public void onUpdate()
 	{
 		super.onUpdate();
-		if (super.worldObj.isRemote)
+		if (this.worldObj.isRemote)
 			;
 
-		if (!super.worldObj.isRemote)
+		if (!this.worldObj.isRemote)
 		{
 			double distance = this.getDistance(this.startX, this.startY, this.startZ);
-			if (distance >= this.maxRange || super.ticksExisted > this.maxRange / this.speedPerTick)
+			if (distance >= this.maxRange || this.ticksExisted > this.maxRange / this.speedPerTick)
 				this.setDead();
 		}
 	}
@@ -124,7 +123,7 @@ public class EntityPlasmaBall extends EntityThrowable
 
 	public byte getActionType()
 	{
-		return super.dataWatcher.getWatchableObjectByte(30);
+		return this.dataWatcher.getWatchableObjectByte(30);
 	}
 
 	@Override
@@ -202,9 +201,9 @@ public class EntityPlasmaBall extends EntityThrowable
 					}
 					// TODO gamerforEA code end
 
-					super.worldObj.setBlockToAir(curPosX, curPosY, curPosZ);
-					super.worldObj.setBlock(curPosX, curPosY, curPosZ, GraviSuite.blockRelocatorPortal);
-					super.worldObj.markBlockForUpdate(curPosX, curPosY, curPosZ);
+					this.worldObj.setBlockToAir(curPosX, curPosY, curPosZ);
+					this.worldObj.setBlock(curPosX, curPosY, curPosZ, GraviSuite.blockRelocatorPortal);
+					this.worldObj.markBlockForUpdate(curPosX, curPosY, curPosZ);
 					MinecraftServer minecraftserver = MinecraftServer.getServer();
 					WorldServer targetServer = minecraftserver.worldServerForDimension(this.targetTpPoint.dimID);
 					targetServer.theChunkProviderServer.loadChunk((int) this.targetTpPoint.x >> 4, (int) this.targetTpPoint.z >> 4);
@@ -228,14 +227,14 @@ public class EntityPlasmaBall extends EntityThrowable
 					if (tileEntity instanceof TileEntityRelocatorPortal)
 					{
 						ItemRelocator.TeleportPoint tmpPoint = new ItemRelocator.TeleportPoint();
-						tmpPoint.dimID = super.worldObj.provider.dimensionId;
+						tmpPoint.dimID = this.worldObj.provider.dimensionId;
 						tmpPoint.x = curPosX;
 						tmpPoint.y = curPosY;
 						tmpPoint.z = curPosZ;
 						((TileEntityRelocatorPortal) tileEntity).setParentPortal(tmpPoint);
 					}
 
-					TileEntity currentTileEntity = super.worldObj.getTileEntity(curPosX, curPosY, curPosZ);
+					TileEntity currentTileEntity = this.worldObj.getTileEntity(curPosX, curPosY, curPosZ);
 					if (tileEntity instanceof TileEntityRelocatorPortal)
 						((TileEntityRelocatorPortal) currentTileEntity).setParentPortal(this.targetTpPoint);
 				}
@@ -244,7 +243,7 @@ public class EntityPlasmaBall extends EntityThrowable
 				}
 		}
 
-		if (!super.worldObj.isRemote)
+		if (!this.worldObj.isRemote)
 			this.setDead();
 
 	}
